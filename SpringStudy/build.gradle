@@ -23,8 +23,14 @@ repositories {
 
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
+	//JPA
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	// MariaDB
+	implementation 'org.mariadb.jdbc:mariadb-java-client'
+	// Lombok
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
+
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
 
