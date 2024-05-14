@@ -21,6 +21,10 @@ public class User {
     @Column
     private String address;
 
+    @ManyToOne
+    @JoinColumn(name = "TEAM_ID")
+    private Team team;
+
     @Builder
     public User(Long id, String name, String email, String address) {
         this.id = id;
@@ -40,4 +44,6 @@ public class User {
     public void updateAddress(String address){
         this.address = address;
     }
+
+    public void updateTeam(Team team) {this.team = team;}
 }

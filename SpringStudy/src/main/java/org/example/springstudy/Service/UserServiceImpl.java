@@ -1,7 +1,9 @@
 package org.example.springstudy.Service;
 
+import org.example.springstudy.DTO.TeamResponseDTO;
 import org.example.springstudy.DTO.UserDTO;
 import org.example.springstudy.DTO.UserResponseDTO;
+import org.example.springstudy.Entity.Team;
 import org.example.springstudy.Entity.User;
 import org.example.springstudy.Repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,10 +12,12 @@ import org.springframework.stereotype.Service;
 @Service
 public class UserServiceImpl implements UserService{
     private final UserRepository userRepository;
+    private final TeamService teamService;
 
     @Autowired
-    public UserServiceImpl(UserRepository userRepository) {
+    public UserServiceImpl(UserRepository userRepository, TeamService teamService) {
         this.userRepository = userRepository;
+        this.teamService = teamService;
     }
 
     @Override
@@ -23,6 +27,17 @@ public class UserServiceImpl implements UserService{
 
         // 엔티티 저장
         userRepository.save(userEntity);
+        return toUserResponseDTO(userEntity);
+    }
+
+    public UserResponseDTO setTeam(Long userId, Long teamId){
+        User userEntity = userRepository.getReferenceById(userId);
+        Team teamEntity = teamService.readTeamEntity(teamId);
+
+        userEntity.updateTeam(teamEntity);
+
+        userRepository.save(userEntity);
+
         return toUserResponseDTO(userEntity);
     }
 
@@ -72,6 +87,7 @@ public class UserServiceImpl implements UserService{
                 .name(user.getName())
                 .email(user.getEmail())
                 .address(user.getAddress())
+                .team(teamService.tpTeamResponseDTO(user.getTeam()))
                 .build();
     }
 }

@@ -25,20 +25,26 @@ public class UserController {
         return userService.createUser(userDTO);
     }
 
+    @PostMapping(value = "/{userid}/{teamid}")
+    public UserResponseDTO setTeam(@PathVariable(value = "userid") Long userId,
+                                   @PathVariable(value = "teamid") Long teamId) {
+        return userService.setTeam(userId, teamId);
+    }
+
     @GetMapping(value = "/{id}")
-    public UserResponseDTO readUser(@PathVariable("id") Long id){
+    public UserResponseDTO readUser(@PathVariable(value = "id") Long id){
         logger.info("UserController-ReadUser [Data]: " + id);
         return userService.readUser(id);
     }
 
     @PutMapping(value = "/update/{id}")
-    public UserResponseDTO updateUser(@PathVariable("id") Long id, @RequestBody UserDTO userDTO) {
+    public UserResponseDTO updateUser(@PathVariable(value = "id") Long id, @RequestBody UserDTO userDTO) {
         logger.info("UserController-UpdateUser [Data]: " + userDTO);
         return userService.updateUser(id, userDTO);
     }
 
     @DeleteMapping(value = "/{id}")
-    public String deleteUser(@PathVariable("id") Long id){
+    public String deleteUser(@PathVariable(value = "id") Long id){
         logger.info("UserController-DeleteUser [Data]: " + id);
         return userService.deleteUser(id);
     }
