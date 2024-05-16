@@ -49,6 +49,11 @@ public class UserController {
     userService.delete(id);
   }
 
+  // 유저에 대한 팀을 업데이트하는 컨트롤러 생성(update)
+  @PostMapping(value = "/{UserID}/{TeamID}")
+  public UserDTO userTeamUpdate(@PathVariable(value = "UserID")Long UserID,
+                                @PathVariable(value = "TeamID") Long TeamID){
+    return userService.userTeamUpdate(UserID,TeamID);
+  }
 }
 
-// 유저에 대한 팀을 업데이트하는 컨트롤러 생성(update)

@@ -1,6 +1,7 @@
 package com.example.springstudy.Service;
 
 import com.example.springstudy.DTO.UserDTO;
+import com.example.springstudy.Entity.Team;
 import com.example.springstudy.Entity.UserEntity;
 import com.example.springstudy.Repository.TeamRepository;
 import com.example.springstudy.Repository.UserRepository;
@@ -23,7 +24,7 @@ public class UserServiceImpl implements UserService {
 @Autowired
 TeamRepository teamRepository;
   @Override
-  //엔티티 -> DTO
+  //DTO -> 엔티티
   public UserDTO create(UserDTO userDTO) {
     UserEntity userEntity = UserEntity.builder()
         .name(userDTO.getName())
@@ -38,7 +39,7 @@ TeamRepository teamRepository;
 
 
   @Override
-  //DTO->엔티티
+  //엔티티 -> DTO
   public UserDTO read(Long id) {
     UserEntity userEntity=userRepository.findById(id).orElseThrow();
 
@@ -70,7 +71,13 @@ TeamRepository teamRepository;
     userRepository.deleteById(id);
   }
 @Override
-  public void userTeamUpdate(Long id, UserDTO userDTO){
+  public UserDTO userTeamUpdate(Long UserID, Long TeamID){
+    UserEntity userEntity = userRepository.getReferenceById(UserID);
+    Team team = teamRepository.getReferenceById(TeamID);
 
-  }
+    userEntity.setTeam(team);
+    userRepository.save(userEntity);
+
+  return null;
+}
 }

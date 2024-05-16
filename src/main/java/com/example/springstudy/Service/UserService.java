@@ -17,5 +17,5 @@ public interface UserService {
 
   public void delete(Long id);
 
-  void userTeamUpdate(Long id, UserDTO userDTO);
+  public UserDTO userTeamUpdate(Long UserID, Long TeamID);
 }
