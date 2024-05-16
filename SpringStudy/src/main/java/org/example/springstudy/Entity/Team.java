@@ -20,7 +20,7 @@ public class Team {
 
     private String name;
 
-    @OneToMany(mappedBy = "team")
+    @OneToMany(mappedBy = "team", cascade = CascadeType.REMOVE)
     private List<User> users = new ArrayList<User>();
 
 
@@ -28,5 +28,10 @@ public class Team {
     public Team(Long id, String name) {
         this.id = id;
         this.name = name;
+    }
+
+    public void addUser(User user) {
+        users.add(user);
+        user.updateTeam(this);
     }
 }

@@ -45,5 +45,10 @@ public class User {
         this.address = address;
     }
 
-    public void updateTeam(Team team) {this.team = team;}
+    public void updateTeam(Team team) {
+        this.team = team;
+        if (team != null && !team.getUsers().contains(this)) {
+            team.getUsers().add(this);
+        }
+    }
 }

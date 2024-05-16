@@ -10,5 +10,5 @@ public interface TeamService {
     public Team readTeamEntity(Long id);
     public TeamResponseDTO updateTeam(TeamDTO teamDTO);
     public String deleteTeam(Long id);
-    public TeamResponseDTO tpTeamResponseDTO(Team team);
+    public TeamDTO toTeamDTO(Team team);
 }

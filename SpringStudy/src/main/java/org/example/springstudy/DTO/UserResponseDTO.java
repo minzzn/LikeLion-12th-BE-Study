@@ -9,10 +9,10 @@ public class UserResponseDTO {
     private String name;
     private String email;
     private String address;
-    private TeamResponseDTO team;
+    private TeamDTO team;
 
     @Builder
-    public UserResponseDTO(Long id, String name, String email, String address, TeamResponseDTO team) {
+    public UserResponseDTO(Long id, String name, String email, String address, TeamDTO team) {
         this.id = id;
         this.name = name;
         this.email = email;

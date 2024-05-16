@@ -1,5 +1,6 @@
 package org.example.springstudy.Service;
 
+import org.example.springstudy.DAO.UserDAO;
 import org.example.springstudy.DTO.TeamResponseDTO;
 import org.example.springstudy.DTO.UserDTO;
 import org.example.springstudy.DTO.UserResponseDTO;
@@ -11,64 +12,52 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class UserServiceImpl implements UserService{
-    private final UserRepository userRepository;
+    private final UserDAO userDAO;
     private final TeamService teamService;
 
     @Autowired
-    public UserServiceImpl(UserRepository userRepository, TeamService teamService) {
-        this.userRepository = userRepository;
+    public UserServiceImpl(UserDAO userDAO, TeamService teamService) {
+        this.userDAO = userDAO;
         this.teamService = teamService;
     }
 
     @Override
     public UserResponseDTO createUser(UserDTO userDTO) {
-        // DTO->Entity 변환
         User userEntity = toEntity(userDTO);
 
-        // 엔티티 저장
-        userRepository.save(userEntity);
-        return toUserResponseDTO(userEntity);
-    }
+        User resultEntity = userDAO.createUser(userEntity);
 
-    public UserResponseDTO setTeam(Long userId, Long teamId){
-        User userEntity = userRepository.getReferenceById(userId);
-        Team teamEntity = teamService.readTeamEntity(teamId);
-
-        userEntity.updateTeam(teamEntity);
-
-        userRepository.save(userEntity);
-
-        return toUserResponseDTO(userEntity);
+        return toUserResponseDTO(resultEntity);
     }
 
     @Override
     public UserResponseDTO readUser(Long id) {
-        // id 값으로 엔티티 조회
-        User userEntity = userRepository.getReferenceById(id);
+        User userEntity = userDAO.readUser(id);
         return toUserResponseDTO(userEntity);
     }
 
     @Override
     public UserResponseDTO updateUser(Long id, UserDTO userDTO) {
-        // id 값으로 엔티티 조회
-        User userEntity = userRepository.getReferenceById(id);
+        User userEntity = toEntity(userDTO);
 
-        // update
-        userEntity.updateName(userDTO.getName());
-        userEntity.updateEmail(userDTO.getEmail());
-        userEntity.updateAddress(userDTO.getAddress());
+        User resultEntity = userDAO.updateUser(id, userEntity);
 
-        // 저장
-        userRepository.save(userEntity);
+        return toUserResponseDTO(resultEntity);
+    }
+
+    @Override
+    public UserResponseDTO setTeam(Long userId, Long teamId){
+        Team teamEntity = teamService.readTeamEntity(teamId);
+        User userEntity = userDAO.setTeam(userId, teamEntity);
 
         return toUserResponseDTO(userEntity);
     }
 
     @Override
     public String deleteUser(Long id) {
-        // id 값으로 엔티티 삭제
-        userRepository.deleteById(id);
-        return "success";
+        String result = userDAO.deleteUser(id);
+
+        return result;
     }
 
     // DTO -> User
@@ -81,13 +70,14 @@ public class UserServiceImpl implements UserService{
     }
 
     // User -> DTO
+    @Override
     public UserResponseDTO toUserResponseDTO(User user){
         return UserResponseDTO.builder()
                 .id(user.getId())
                 .name(user.getName())
                 .email(user.getEmail())
                 .address(user.getAddress())
-                .team(teamService.tpTeamResponseDTO(user.getTeam()))
+                .team(teamService.toTeamDTO(user.getTeam()))
                 .build();
     }
 }
