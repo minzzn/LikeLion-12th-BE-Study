@@ -1,5 +1,6 @@
 package com.example.springstudy.Service;
 
+import com.example.springstudy.DAO.UserDAO;
 import com.example.springstudy.DTO.UserDTO;
 import com.example.springstudy.Entity.Team;
 import com.example.springstudy.Entity.UserEntity;
@@ -8,76 +9,79 @@ import com.example.springstudy.Repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 
 @Service
 public class UserServiceImpl implements UserService {
- UserRepository userRepository;
+  UserRepository userRepository;
+  private final UserDAO userDAO;
 
- //autowired -> 생성자를 통한 의존성을 주입
-@Autowired
-  public UserServiceImpl(UserRepository userRepository) {
+  //autowired -> 생성자를 통한 의존성을 주입
+  @Autowired
+  public UserServiceImpl(UserRepository userRepository, UserDAO userDAO) {
 
-  this.userRepository = userRepository;
+    this.userRepository = userRepository;
 
+    this.userDAO = userDAO;
   }
 
-@Autowired
-TeamRepository teamRepository;
+  @Autowired
+  TeamRepository teamRepository;
+
   @Override
   //DTO -> 엔티티
   public UserDTO create(UserDTO userDTO) {
     UserEntity userEntity = UserEntity.builder()
-        .name(userDTO.getName())
+        .username(userDTO.getUsername())
         .email(userDTO.getEmail())
-        .address(userDTO.getAddress())
+        .password(userDTO.getPassword())
         .build();
-
-    userRepository.save(userEntity);
-
+    userDAO.create(userEntity);
     return null;
   }
 
 
   @Override
   //엔티티 -> DTO
-  public UserDTO read(Long id) {
-    UserEntity userEntity=userRepository.findById(id).orElseThrow();
+  public UserEntity read(Long id) {
 
+    UserEntity userEntity = userDAO.read(id);
+    return toUserResponseDTO(userEntity);
+  }
 
-    UserDTO userDTO = UserDTO.builder()
-        .name(userEntity.getName())
-        .email(userEntity.getEmail())
-        .address(userEntity.getAddress())
+  public UserEntity touserEntity(UserDTO userDTO) {
+    return UserEntity.builder()
+        .username(userDTO.getUsername())
+        .email(userDTO.getEmail())
+        .password(userDTO.getPassword())
         .build();
-    return userDTO;
   }
 
-@Override
+  public UserEntity toUserResponseDTO(UserEntity userEntity) {
+    return UserEntity.builder()
+        .username(userEntity.getUsername())
+        .email(userEntity.getEmail())
+        .password(userEntity.getPassword())
+        .build();
+  }
+
+  @Override
   public void update(Long id, UserDTO userDTO) {
-    UserEntity userEntity = userRepository.findById(id).orElseThrow();
+    UserEntity userEntity = UserEntity.builder()
+        .username(userDTO.getUsername())
+        .email(userDTO.getEmail())
+        .password(userDTO.getPassword())
+        .build();
+    userDAO.update(id, userEntity);
 
-    userEntity.setName(userDTO.getName());
-    userEntity.setEmail(userDTO.getEmail());
-    userEntity.setAddress(userDTO.getAddress());
-
-    userRepository.save(userEntity);
   }
-
-
 
   @Override
   public void delete(Long id) {
-
-    userRepository.deleteById(id);
+    userDAO.delete(id);
   }
-@Override
-  public UserDTO userTeamUpdate(Long UserID, Long TeamID){
-    UserEntity userEntity = userRepository.getReferenceById(UserID);
-    Team team = teamRepository.getReferenceById(TeamID);
-
-    userEntity.setTeam(team);
-    userRepository.save(userEntity);
-
-  return null;
-}
+  public List<UserEntity> readAll() {
+    return userRepository.findAll();
+  }
 }

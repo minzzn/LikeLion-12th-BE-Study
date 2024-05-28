@@ -1,11 +1,10 @@
-package com.example.springstudy.Service;
+package com.example.springstudy.DAO;
 
 import com.example.springstudy.DTO.TeamDTO;
 import com.example.springstudy.Entity.Team;
 
-
-public interface TeamService {
-  public Team Team_create(TeamDTO teamDTO);
+public interface TeamDAO {
+  public Team Team_create(Team team);
 
   public Team Team_read(Long id);
 

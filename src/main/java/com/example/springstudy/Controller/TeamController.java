@@ -2,7 +2,7 @@ package com.example.springstudy.Controller;
 
 
 import com.example.springstudy.DTO.TeamDTO;
-import com.example.springstudy.DTO.UserDTO;
+import com.example.springstudy.Entity.Team;
 import com.example.springstudy.Service.TeamService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -28,9 +28,9 @@ public class TeamController {
 
 
   @GetMapping("/read/{id}")
-  public TeamDTO Team_read(@PathVariable(value = "id") Long id) {
+  public Team Team_read(@PathVariable(value = "id") Long id) {
 
-    TeamDTO teamDTO = teamService.Team_read(id);
+    Team teamDTO = teamService.Team_read(id);
     return teamDTO;
   }
 

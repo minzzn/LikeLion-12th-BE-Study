@@ -21,19 +21,6 @@ public class Team {
   private Long id;
   private String teamName;
 
-@OneToMany(mappedBy = "team")
-
-  private List<UserEntity> members = new ArrayList<>();
-
-  public void addMember(UserEntity userEntity){
-    this.members.add(userEntity);
-
-    if (this != userEntity.getTeam()){
-      userEntity.setTeam(this);
-    }
-  }
-
-
 
 
   @Builder

@@ -6,7 +6,7 @@ import org.springframework.boot.autoconfigure.domain.EntityScan;
 
 //import 단축키 com + enter
 @Entity
-@Table(name = "user4")
+@Table(name = "user")
 @NoArgsConstructor
 @Getter
 @Setter
@@ -16,31 +16,37 @@ public class UserEntity {
   @GeneratedValue(strategy = GenerationType.IDENTITY) //시퀀스랑 동일 개념 , 마리아 디비 : 인크리???????
   private Long id;
   @Column
-  private String name;
+  private String username;
   @Column
   private String email;
   @Column
-  private String address;
+  private Long password;
 
 
-  @ManyToOne
-  @JoinColumn(name = "TEAM_ID")
-  private Team team;
 
-  public void setTeam(Team team){
-    this.team=team;
 
-    if(!team.getMembers().contains(this)){
-      team.getMembers().add(this);
-    }
-  }
+
 
   @Builder
-  public UserEntity(String name, String email, String address) {
-    this.name = name;
+  public UserEntity(String username, String email, Long password) {
+    this.username = username;
     this.email = email;
-    this.address = address;
+    this.password = password;
   }
 
 
+  public void updateName(String username) {
+
+    this.username = username;
+  }
+
+  public void updateEmail(String email) {
+
+    this.email = email;
+  }
+
+  public void updatePassword(Long password) {
+
+    this.password=password;
+  }
 }

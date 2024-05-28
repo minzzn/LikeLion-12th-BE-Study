@@ -3,19 +3,20 @@ package com.example.springstudy.Controller;
 
 import com.example.springstudy.DTO.UserDTO;
 
-import com.example.springstudy.Entity.Team;
+import com.example.springstudy.Entity.UserEntity;
 import com.example.springstudy.Repository.TeamRepository;
 import com.example.springstudy.Service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 // https://localhost:port/user
-@RequestMapping("/user")
+@RequestMapping("/users")
 public class UserController {
 
-  @Autowired
-  TeamRepository teamRepository;
+
 
   private UserDTO user;
   private final UserService userService;
@@ -33,10 +34,15 @@ public class UserController {
     return this.user;
   }
 
+
+  @GetMapping("/read")
+  public List<UserEntity> readAll() {
+    return userService.readAll();
+  }
+
   @GetMapping( "/read/{id}")
-  public UserDTO read(@PathVariable(value = "id") Long id) {
-    UserDTO userDTO = userService.read(id);
-    return userDTO;
+  public UserEntity read(@PathVariable(value = "id") Long id) {
+    return userService.read(id);
   }
 
   @PutMapping(value = "/update/{id}")
@@ -46,14 +52,10 @@ public class UserController {
 
   @DeleteMapping( value = "/delete/{id}")
   public void delete(@PathVariable(value = "id") Long id){
+
     userService.delete(id);
   }
 
-  // 유저에 대한 팀을 업데이트하는 컨트롤러 생성(update)
-  @PostMapping(value = "/{UserID}/{TeamID}")
-  public UserDTO userTeamUpdate(@PathVariable(value = "UserID")Long UserID,
-                                @PathVariable(value = "TeamID") Long TeamID){
-    return userService.userTeamUpdate(UserID,TeamID);
-  }
+
 }
 

@@ -8,17 +8,16 @@ import lombok.*;
 @NoArgsConstructor
 public class UserDTO {
 
-  private  String name;
+  private  String username;
   private  String email;
-  private  String address;
-  private String teamName;
+  private  Long password;
+
 
   @Builder
-  public UserDTO(String name, String email, String address, String teamName) {
-    this.name = name;
+  public UserDTO(String username, String email, Long password) {
+    this.username = username;
     this.email = email;
-    this.address = address;
-    this.teamName=teamName;
+    this.password = password;
   }
 
 
