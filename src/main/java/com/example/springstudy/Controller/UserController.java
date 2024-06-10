@@ -1,12 +1,15 @@
 package com.example.springstudy.Controller;
 
 
+import com.example.springstudy.DTO.LoanDTO;
 import com.example.springstudy.DTO.UserDTO;
 
 import com.example.springstudy.Entity.UserEntity;
-import com.example.springstudy.Repository.TeamRepository;
+import com.example.springstudy.Service.LoanService;
 import com.example.springstudy.Service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -16,14 +19,14 @@ import java.util.List;
 @RequestMapping("/users")
 public class UserController {
 
-
-
   private UserDTO user;
   private final UserService userService;
+  private final LoanService loanService;
 
   @Autowired
-  public UserController(UserService userService) {
+  public UserController(UserService userService, LoanService loanService) {
     this.userService = userService;
+    this.loanService = loanService;
   }
 
   @PostMapping(value = "/create")
@@ -36,14 +39,17 @@ public class UserController {
 
 
   @GetMapping("/read")
-  public List<UserEntity> readAll() {
+  public List<UserDTO> readAll() {
+
     return userService.readAll();
   }
 
   @GetMapping( "/read/{id}")
-  public UserEntity read(@PathVariable(value = "id") Long id) {
+  public UserDTO read(@PathVariable(value = "id") Long id) {
+
     return userService.read(id);
   }
+
 
   @PutMapping(value = "/update/{id}")
   public void update(@PathVariable(value = "id")Long id, @RequestBody UserDTO userDTO){
@@ -51,11 +57,14 @@ public class UserController {
   }
 
   @DeleteMapping( value = "/delete/{id}")
-  public void delete(@PathVariable(value = "id") Long id){
-
-    userService.delete(id);
+  public ResponseEntity<String> delete(@PathVariable(value = "id")Long id) {
+    boolean deleted = userService.delete(id);
+    if (deleted) {
+      return ResponseEntity.ok("사용자가 삭제되었습니다.");
+    } else {
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("대출 중인 도서가 있거나 사용자가 없습니다.");
+    }
   }
-
 
 }
 

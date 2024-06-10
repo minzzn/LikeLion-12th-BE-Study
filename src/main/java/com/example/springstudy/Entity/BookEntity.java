@@ -24,6 +24,7 @@ public class BookEntity {
   private Long isbn;
   @Column
   private String publishedDate;
+  private boolean isBorrowed;
 
   @Builder
   public BookEntity(String title, String author, Long isbn, String publishedDate) {
@@ -48,24 +49,21 @@ public class BookEntity {
     this.isbn=isbn;
   }
 
-  //날짜를 오늘 날짜로 자동으로 할당 받기
-  @PrePersist
-  protected void onCreate() {
-    if (this.publishedDate == null) {
-      this.publishedDate = getCurrentDate();
-    }
-  }
+
+
   public String getPublishedDate() {
+
     return publishedDate;
   }
-  private String getCurrentDate() {
-    LocalDate today = LocalDate.now();
-    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-    return today.format(formatter);
-  }
+
 
   public void setPublishedDate(String publishedDate) {
     this.publishedDate = publishedDate;
+  }
+
+  public boolean isBorrowed() {
+
+    return this.isBorrowed;
   }
 }
 

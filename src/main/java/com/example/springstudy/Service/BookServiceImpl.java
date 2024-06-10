@@ -2,17 +2,14 @@ package com.example.springstudy.Service;
 
 
 import com.example.springstudy.DAO.BookDAO;
-import com.example.springstudy.DAO.UserDAO;
 import com.example.springstudy.DTO.BookDTO;
-import com.example.springstudy.DTO.UserDTO;
 import com.example.springstudy.Entity.BookEntity;
-import com.example.springstudy.Entity.UserEntity;
 import com.example.springstudy.Repository.BookRepository;
-import com.example.springstudy.Repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class BookServiceImpl implements BookService{
@@ -40,11 +37,20 @@ public class BookServiceImpl implements BookService{
   }
 
   @Override
-  public BookEntity read(Long id) {
-
-    BookEntity bookEntity = bookDAO.read(id);
-    return toBookResponseDTO(bookEntity);
+  public BookDTO read(Long id) {
+    BookEntity bookEntity = bookRepository.getReferenceById(id);
+    return convertToDTO(bookEntity);
   }
+
+  private BookDTO convertToDTO(BookEntity bookEntity) {
+    BookDTO bookDTO = new BookDTO();
+    bookDTO.setIsbn(bookEntity.getIsbn());
+    bookDTO.setTitle(bookEntity.getTitle());
+    bookDTO.setAuthor(bookEntity.getAuthor());
+    return bookDTO;
+  }
+
+
 
   @Override
   public void update(Long id, BookDTO bookDTO) {
@@ -52,36 +58,22 @@ public class BookServiceImpl implements BookService{
         .title(bookDTO.getTitle())
         .author(bookDTO.getAuthor())
         .isbn(bookDTO.getIsbn())
+        .publishedDate(bookDTO.getPublishedDate())
         .build();
     bookDAO.update(id, bookEntity);
   }
 
   @Override
-  public void delete(Long id) {
+  public String delete(Long id) {
     bookDAO.delete(id);
-
+    return null;
   }
 
   @Override
-  public List<BookEntity> readAll() {
-     return bookDAO.readAll();
+  public List<BookDTO> readAll() {
+    List<BookEntity> bookEntities = bookRepository.findAll();
+    return bookEntities.stream()
+        .map(this::convertToDTO)
+        .collect(Collectors.toList());
   }
-
-  public BookEntity tobookEntity(BookEntity bookEntity) {
-    return BookEntity.builder()
-        .title(bookEntity.getTitle())
-        .author(bookEntity.getAuthor())
-        .isbn(bookEntity.getIsbn())
-        .build();
-  }
-
-  public BookEntity toBookResponseDTO(BookEntity bookEntity) {
-    return BookEntity.builder()
-        .title(bookEntity.getTitle())
-        .author(bookEntity.getAuthor())
-        .isbn(bookEntity.getIsbn())
-        .publishedDate(bookEntity.getPublishedDate())
-        .build();
-  }
-
 }

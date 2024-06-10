@@ -3,6 +3,7 @@ package com.example.springstudy.DAO;
 import com.example.springstudy.DTO.BookDTO;
 import com.example.springstudy.Entity.BookEntity;
 
+import java.awt.print.Book;
 import java.util.List;
 
 public interface BookDAO {
@@ -12,7 +13,7 @@ public interface BookDAO {
 
   void update(Long id, BookEntity bookEntity);
 
-  public void delete(Long id);
+  public String delete(Long id);
 
   List<BookEntity> readAll();
 

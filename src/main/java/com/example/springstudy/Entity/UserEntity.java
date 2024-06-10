@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 
+import java.util.List;
+
 //import 단축키 com + enter
 @Entity
 @Table(name = "user")
@@ -23,8 +25,9 @@ public class UserEntity {
   private Long password;
 
 
-
-
+//양방향
+  @OneToMany(mappedBy = "user")
+  private List<LoanEntity> loans;
 
 
   @Builder
@@ -48,5 +51,10 @@ public class UserEntity {
   public void updatePassword(Long password) {
 
     this.password=password;
+  }
+
+  public boolean hasBooksBorrowed() {
+    // 사용자가 대출한 도서 목록을 확인하고, 대출한 도서가 있는지 확인
+    return !loans.isEmpty();
   }
 }
