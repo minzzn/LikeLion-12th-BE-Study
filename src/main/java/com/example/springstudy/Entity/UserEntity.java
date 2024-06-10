@@ -23,6 +23,8 @@ public class UserEntity {
   private String email;
   @Column
   private Long password;
+  private int currentLoans = 0; // 현재 대출 중인 도서 수 초기화
+
 
 
 //양방향
@@ -57,4 +59,14 @@ public class UserEntity {
     // 사용자가 대출한 도서 목록을 확인하고, 대출한 도서가 있는지 확인
     return !loans.isEmpty();
   }
+
+  public int getCurrentLoans() {
+    return currentLoans;
+  }
+
+  public void setCurrentLoans(int currentLoans) {
+    this.currentLoans = currentLoans;
+  }
+
+
 }

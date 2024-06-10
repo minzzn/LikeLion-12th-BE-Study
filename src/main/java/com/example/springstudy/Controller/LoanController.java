@@ -5,6 +5,7 @@ import com.example.springstudy.DTO.LoanDTO;
 import com.example.springstudy.Entity.LoanEntity;
 import com.example.springstudy.Service.BookService;
 import com.example.springstudy.Service.LoanService;
+import com.example.springstudy.Service.LoanServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
@@ -29,12 +30,18 @@ public class LoanController {
 
 
   @PostMapping("/create")
-  public LoanDTO createLoan(@RequestBody LoanDTO loanDTO) {
-    this.loan=loanDTO;
-    loanService.createLoan(loanDTO);
-    return this.loan;
+  public ResponseEntity<LoanDTO> createLoan(@RequestBody LoanDTO loanDTO) {
+    try {
+      LoanDTO createdLoan = loanService.createLoan(loanDTO);
+      return ResponseEntity.ok(createdLoan);
+    } catch (LoanServiceImpl.AlreadyLoanedException e) {
+      return ResponseEntity.badRequest().body(new LoanDTO("이미 동일한 도서를 대출한 이력이 있습니다."));
+    } catch (LoanServiceImpl.MaxLoansExceededException e) {
+      return ResponseEntity.status(409).body(new LoanDTO("사용자가 대출 가능한 최대 권수(3권)를 초과하였습니다."));
+    } catch (Exception e) {
+      return ResponseEntity.status(500).body(new LoanDTO("서버 오류가 발생했습니다."));
+    }
   }
-
 
   @GetMapping("/read")
   public List<LoanDTO> readAll() {

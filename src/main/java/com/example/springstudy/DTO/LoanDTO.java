@@ -13,6 +13,7 @@ public class LoanDTO {
   private Long user;
   private LocalDateTime loanDate;
   private LocalDateTime returnDate;
+  private String message; // 메시지 필드 추가
 
 
   @Builder
@@ -38,5 +39,8 @@ public class LoanDTO {
 
   public void setReturnDate(LocalDateTime returnDate) {
     this.returnDate = returnDate;
+  }
+  public LoanDTO(String message) {
+    this.message = message;
   }
 }

@@ -16,9 +16,12 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class LoanServiceImpl implements LoanService {
+  private static final int MAX_LOANS_PER_BOOK = 3;
+  private static final int MAX_LOANS_PER_USER = 3;
 
   private final LoanRepository loanRepository;
   private final BookRepository bookRepository;
@@ -32,62 +35,86 @@ public class LoanServiceImpl implements LoanService {
   }
 
   @Override
-//  public LoanDTO createLoan(LoanDTO loanDTO) {
-//    BookEntity bookEntity = bookRepository.getReferenceById(loanDTO.getBook());
-//    UserEntity userEntity = userRepository.getReferenceById(loanDTO.getUser());
-//    LocalDateTime now = LocalDateTime.now();
-//    LoanEntity loanEntity = LoanEntity.builder()
-//        .book(bookEntity)
-//        .user(userEntity)
-//        .loanDate(now)
-//        .returnDate(now.plusDays(7))
-//        .build();
-//    loanRepository.save(loanEntity);
-//    return null;
-//  }
   public LoanDTO createLoan(LoanDTO loanDTO) {
-    // 대출 가능 여부를 체크
-    if (isBookAvailableForLoan(loanDTO.getUser(), loanDTO.getBook())) {
-      // 대출 가능한 경우 대출 생성 로직 실행
-      BookEntity bookEntity = bookRepository.getReferenceById(loanDTO.getBook());
-      UserEntity  userEntity = userRepository.getReferenceById(loanDTO.getUser());
-      LocalDateTime now = LocalDateTime.now();
-      LoanEntity loanEntity = LoanEntity.builder()
-          .book(bookEntity)
-          .user(userEntity)
-          .loanDate(now)
-          .returnDate(now.plusDays(7))
-          .build();
-      loanRepository.save(loanEntity);
-      // 대출이 성공적으로 생성되었음을 나타내는 메시지를 반환하거나, 생성된 대출 정보를 반환할 수 있음
-      return mapLoanEntityToDTO(loanEntity); // 예시로 LoanEntity를 LoanDTO로 매핑하여 반환
-    } else {
-      // 대출 불가능한 경우 에러 처리 로직 실행
-      throw new IllegalStateException("이미 동일한 도서를 대출한 이력이 있습니다.");
+    Long bookId = loanDTO.getBook();
+    Long userId = loanDTO.getUser();
+
+    if (isBookAlreadyLoanedByUser(userId, bookId)) {
+      throw new AlreadyLoanedException("이미 동일한 도서를 대출한 이력이 있습니다.");
     }
+
+    if (!isBookAvailableForLoan(bookId)) {
+      throw new MaxLoansExceededException("도서의 대출 가능한 인원을 초과하였습니다.");
+    }
+
+    if (hasUserExceededMaxLoans(userId)) {
+      throw new MaxLoansExceededException("사용자가 대출 가능한 최대 권수(3권)를 초과하였습니다.");
+    }
+
+
+    BookEntity bookEntity = bookRepository.getReferenceById(bookId);
+    UserEntity userEntity = userRepository.getReferenceById(userId);
+    LocalDateTime now = LocalDateTime.now();
+    LoanEntity loanEntity = LoanEntity.builder()
+        .book(bookEntity)
+        .user(userEntity)
+        .loanDate(now)
+        .returnDate(now.plusDays(7))
+        .build();
+    loanRepository.save(loanEntity);
+
+    bookEntity.setCurrentLoans(bookEntity.getCurrentLoans() + 1);
+    userEntity.setCurrentLoans(userEntity.getCurrentLoans() + 1);
+    bookRepository.save(bookEntity);
+    userRepository.save(userEntity);
+
+    return mapLoanEntityToDTO(loanEntity);
+  }
+  public class AlreadyLoanedException extends RuntimeException {
+    public AlreadyLoanedException(String message) {
+      super(message);
+    }
+  }
+
+  public class MaxLoansExceededException extends RuntimeException {
+    public MaxLoansExceededException(String message) {
+      super(message);
+    }
+  }
+
+  @Override
+  public List<LoanDTO> getLoansByUser(Long userId) {
+    List<LoanEntity> loanEntities = loanRepository.findByUserId(userId);
+    return loanEntities.stream()
+        .map(this::mapLoanEntityToDTO)
+        .collect(Collectors.toList());
+  }
+
+  private boolean isBookAlreadyLoanedByUser(Long userId, Long bookId) {
+    return loanRepository.existsByUserIdAndBookId(userId, bookId);
+  }
+
+  private boolean isBookAvailableForLoan(Long bookId) {
+    BookEntity bookEntity = bookRepository.findById(bookId)
+        .orElseThrow(() -> new RuntimeException("도서를 찾을 수 없습니다."));
+    return bookEntity.getCurrentLoans() < bookEntity.getMaxLoans();
+  }
+
+  private boolean hasUserExceededMaxLoans(Long userId) {
+    int currentLoans = loanRepository.countByUserId(userId);
+    return currentLoans >= MAX_LOANS_PER_USER;
   }
 
   private LoanDTO mapLoanEntityToDTO(LoanEntity loanEntity) {
-    LoanDTO loanDTO = new LoanDTO();
-    loanDTO.setBook(loanEntity.getBook().getId());
-    loanDTO.setUser(loanEntity.getUser().getId());
-    loanDTO.setLoanDate(loanEntity.getLoanDate());
-    loanDTO.setReturnDate(loanEntity.getReturnDate());
-    return loanDTO;
-  }
+    return LoanDTO.builder()
+        .book(loanEntity.getBook().getId())
+        .user(loanEntity.getUser().getId())
+        .loanDate(loanEntity.getLoanDate())
+        .returnDate(loanEntity.getReturnDate())
+        .build();
 
-  private boolean isBookAvailableForLoan(Long userId, Long bookId) {
-    // 사용자가 동일한 도서를 이미 대출한 이력이 있는지 확인
-    boolean isBookAlreadyLoaned = loanRepository.existsByUserIdAndBookId(userId, bookId);
+}
 
-    // 동일한 도서를 이미 대출한 경우 대출 불가
-    if (isBookAlreadyLoaned) {
-      return false;
-    }
-
-    // 동일한 도서를 대출한 이력이 없는 경우 대출 가능
-    return true;
-  }
 
   @Override
   public List<LoanDTO> readAll() {
@@ -131,27 +158,26 @@ public class LoanServiceImpl implements LoanService {
 
     return bookDTOs;
   }
-  public boolean checkAvailability(Long userId, Long bookId) {
-    // 한 사용자가 동일한 도서를 대출한 이력이 있는지 확인
-    List<LoanEntity> loans = loanRepository.findByUserIdAndBookIdAndReturnedFalse(userId, bookId);
-    return loans.isEmpty();
-  }
+
 
   public boolean returnBook(Long id) {
     // 대출 ID로 대출 정보를 조회
     Optional<LoanEntity> loanOptional = loanRepository.findById(id);
     if (loanOptional.isPresent()) {
       LoanEntity loanEntity = loanOptional.get();
+      BookEntity bookEntity = loanEntity.getBook();
+      UserEntity userEntity = loanEntity.getUser();
 
       // 책 반납 전에 대출 가능 여부를 체크
       if (isBookReturned(loanEntity.getBook())) {
-        // 대출 가능한 경우 책을 반납하고 대출 상태를 업데이트
+
         loanRepository.delete(loanEntity);
 
         // 책 반납 후에 대출 가능한 상태로 업데이트
-        BookEntity bookEntity = loanEntity.getBook();
-        bookEntity.setBorrowed(false);
+        bookEntity.setCurrentLoans(bookEntity.getCurrentLoans() - 1);
+        userEntity.setCurrentLoans(userEntity.getCurrentLoans() - 1);
         bookRepository.save(bookEntity);
+        userRepository.save(userEntity);
 
         return true;
       } else {

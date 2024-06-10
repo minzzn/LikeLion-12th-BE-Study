@@ -10,6 +10,8 @@ public interface LoanService {
 
   LoanDTO createLoan(LoanDTO loanDTO);
 
+  List<LoanDTO> getLoansByUser(Long userId);
+
   List<LoanDTO> readAll();
 
 
@@ -17,4 +19,8 @@ public interface LoanService {
   List<BookDTO> getBooksByUserId(Long userId);
 
   boolean returnBook(Long id);
+
+
+
+
 }

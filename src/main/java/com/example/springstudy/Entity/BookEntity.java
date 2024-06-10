@@ -25,18 +25,21 @@ public class BookEntity {
   @Column
   private String publishedDate;
   private boolean isBorrowed;
+  private int currentLoans = 0;  // 현재 대출 중인 사람 수 초기화
+  private static final int MAX_LOANS = 3;
+
 
   @Builder
   public BookEntity(String title, String author, Long isbn, String publishedDate) {
-   this.title=title;
-   this.author=author;
-   this.isbn=isbn;
-   this.publishedDate=publishedDate;
+    this.title = title;
+    this.author = author;
+    this.isbn = isbn;
+    this.publishedDate = publishedDate;
   }
 
   public void updateTitle(String title) {
 
-      this.title = title;
+    this.title = title;
   }
 
   public void updateAuthor(String author) {
@@ -46,9 +49,8 @@ public class BookEntity {
 
   public void updateIsbn(Long isbn) {
 
-    this.isbn=isbn;
+    this.isbn = isbn;
   }
-
 
 
   public String getPublishedDate() {
@@ -65,6 +67,21 @@ public class BookEntity {
 
     return this.isBorrowed;
   }
+
+  public int getCurrentLoans() {
+    return currentLoans;
+  }
+
+  public void setCurrentLoans(int currentLoans) {
+    this.currentLoans = currentLoans;
+  }
+
+  public int getMaxLoans() {
+    return MAX_LOANS;
+  }
+
+
+
 }
 
 
